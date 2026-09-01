@@ -12,6 +12,15 @@ metadata:
     - OpenCode
   language: Python
 
+# ─────────────────────────────────────────────────────────────────────────────
+# EXTENSION INSTALLATION NOTE (DevSpaces 3.29 / VS Code-based editor)
+#
+# The old Che-Theia attribute "che-code.eclipse.org/vscode-extensions" is NOT
+# supported by the VS Code (che-code) editor.  The correct approach per RH docs
+# (section 14.3) is to set DEFAULT_EXTENSIONS to a path of .vsix binaries and
+# use a postStart event to fetch them before the IDE picks them up.
+# ─────────────────────────────────────────────────────────────────────────────
+
 components:
   - name: dev
     container:
@@ -27,13 +36,14 @@ components:
           exposure: public
           protocol: https
       env:
+        # LLM endpoint – override in your fork or via a DevSpaces user secret
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
         - name: LLM_MODEL_ID
           value: "gpt-4o"
-    attributes:
-      che-code.eclipse.org/vscode-extensions:
-        - saoudrizwan.claude-dev
+        # Tells che-code to install the vsix after it is downloaded by postStart
+        - name: DEFAULT_EXTENSIONS
+          value: "/tmp/cline.vsix"
 
   - name: opencode
     container:
@@ -43,7 +53,8 @@ components:
       cpuLimit: "1"
       cpuRequest: 250m
       mountSources: true
-      command: ["sleep", "infinity"]
+      # Keep the sidecar alive so users can exec into it from the terminal panel
+      command: ["tail", "-f", "/dev/null"]
       env:
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
@@ -51,6 +62,18 @@ components:
           value: "gpt-4o"
 
 commands:
+  # Downloads Cline vsix from Open VSX before the IDE starts picking it up.
+  # Pinned to a known-good version; bump the URL to update.
+  - id: download-cline
+    exec:
+      label: "Download Cline extension"
+      component: dev
+      commandLine: >-
+        curl -fsSL
+        'https://open-vsx.org/api/saoudrizwan/claude-dev/4.1.16/file/saoudrizwan.claude-dev-4.1.16.vsix'
+        -o /tmp/cline.vsix
+        && echo "Cline vsix downloaded to /tmp/cline.vsix"
+
   - id: run-app
     exec:
       label: "Run Flask App"
@@ -61,9 +84,13 @@ commands:
         kind: run
         isDefault: true
 
-  - id: opencode
+  - id: opencode-run
     exec:
-      label: "Open AI Agent (OpenCode)"
+      label: "Launch OpenCode (terminal AI)"
       component: opencode
       commandLine: "cd ${PROJECT_SOURCE} && opencode"
       workingDir: ${PROJECT_SOURCE}
+
+events:
+  postStart:
+    - download-cline

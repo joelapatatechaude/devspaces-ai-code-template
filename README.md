@@ -62,5 +62,5 @@ When you open this repo in DevSpaces, your workspace includes:
 
 ## Customisation
 
-- **LLM endpoint**: edit `LLM_API_BASE_URL` and `LLM_MODEL_ID` in `devfile.yaml`, `.vscode/settings.json`, and `.opencode.json`.
+- **LLM endpoint**: edit `LLM_API_BASE_URL` and `LLM_MODEL_ID` in `devfile.yaml`, `.vscode/settings.json`, and `opencode.json`.
 - **App code**: replace `app.py` with your own Python application.
