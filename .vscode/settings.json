@@ -1,0 +1,5 @@
+{
+  "cline.apiProvider": "openai-compatible",
+  "cline.openAiBaseUrl": "https://api.openai.com/v1",
+  "cline.openAiModelId": "gpt-4o"
+}

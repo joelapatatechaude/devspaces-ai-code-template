@@ -1,0 +1,69 @@
+schemaVersion: 2.2.2
+metadata:
+  name: ai-code-template
+  displayName: AI-Powered Python Workspace
+  description: >
+    Python development environment with Cline (VS Code AI agent) and
+    OpenCode (terminal AI agent) pre-configured for your LLM endpoint.
+  tags:
+    - Python
+    - AI
+    - Cline
+    - OpenCode
+  language: Python
+
+components:
+  - name: dev
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel8:latest
+      memoryLimit: 4Gi
+      memoryRequest: 1Gi
+      cpuLimit: "2"
+      cpuRequest: 500m
+      mountSources: true
+      endpoints:
+        - name: flask
+          targetPort: 8080
+          exposure: public
+          protocol: https
+      env:
+        - name: LLM_API_BASE_URL
+          value: "https://api.openai.com/v1"
+        - name: LLM_MODEL_ID
+          value: "gpt-4o"
+    attributes:
+      che-code.eclipse.org/vscode-extensions:
+        - saoudrizwan.claude-dev
+
+  - name: opencode
+    container:
+      image: ghcr.io/anomalyco/opencode:latest
+      memoryLimit: 1Gi
+      memoryRequest: 256Mi
+      cpuLimit: "1"
+      cpuRequest: 250m
+      mountSources: true
+      command: ["sleep", "infinity"]
+      env:
+        - name: LLM_API_BASE_URL
+          value: "https://api.openai.com/v1"
+        - name: LLM_MODEL_ID
+          value: "gpt-4o"
+
+commands:
+  - id: run-app
+    exec:
+      label: "Run Flask App"
+      component: dev
+      commandLine: "pip install -r requirements.txt && python app.py"
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+        isDefault: true
+
+  - id: opencode
+    exec:
+      label: "Open AI Agent (OpenCode)"
+      component: opencode
+      commandLine: "cd ${PROJECT_SOURCE} && opencode"
+      workingDir: ${PROJECT_SOURCE}
