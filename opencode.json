@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-4o",
+  "model": "openai/gpt-oss-120b",
   "provider": {
     "openai": {
       "options": {

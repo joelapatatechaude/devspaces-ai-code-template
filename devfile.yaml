@@ -40,7 +40,7 @@ components:
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
         - name: LLM_MODEL_ID
-          value: "gpt-4o"
+          value: "gpt-oss-120b"
         # Tells che-code to install the vsix after it is downloaded by postStart
         - name: DEFAULT_EXTENSIONS
           value: "/tmp/cline.vsix"
@@ -61,7 +61,7 @@ components:
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
         - name: LLM_MODEL_ID
-          value: "gpt-4o"
+          value: "gpt-oss-120b"
 
 commands:
   # Downloads Cline vsix from Open VSX before the IDE starts picking it up.
