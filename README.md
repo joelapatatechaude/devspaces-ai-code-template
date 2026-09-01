@@ -22,38 +22,41 @@ When you open this repo in DevSpaces, your workspace includes:
    apiVersion: v1
    kind: Secret
    metadata:
-     name: llm-credentials
+     name: litemass-llm
      namespace: <username>-devspaces
      labels:
-       controller.devfile.io/mount-to-devworkspace: "true"
-       controller.devfile.io/watch-secret: "true"
+       controller.devfile.io/devworkspace-mount-secret: "true"
      annotations:
        controller.devfile.io/mount-as: env
+   type: Opaque
    stringData:
-     OPENAI_API_KEY: "<your-api-key>"
+     LLM_API_KEY: "<your-api-key>"
+     LLM_API_BASE_URL: "<your-llm-endpoint, e.g. https://api.litemass.com/v1>"
    ```
 
    Or via CLI:
 
    ```bash
-   oc create secret generic llm-credentials \
-     --from-literal=OPENAI_API_KEY='<your-api-key>' \
+   oc create secret generic litemass-llm \
+     --from-literal=LLM_API_KEY='<your-api-key>' \
+     --from-literal=LLM_API_BASE_URL='<your-llm-endpoint>' \
      -n <username>-devspaces
 
-   oc label secret llm-credentials \
-     controller.devfile.io/mount-to-devworkspace=true \
-     controller.devfile.io/watch-secret=true \
+   oc label secret litemass-llm \
+     controller.devfile.io/devworkspace-mount-secret=true \
      -n <username>-devspaces
 
-   oc annotate secret llm-credentials \
+   oc annotate secret litemass-llm \
      controller.devfile.io/mount-as=env \
      -n <username>-devspaces
    ```
 
+   The secret values override the defaults in the devfile. Restart your workspace after creating or updating the secret.
+
 2. **Launch the workspace** from your DevSpaces dashboard:
 
    ```
-   https://<devspaces-url>/dashboard/#/load-factory?url=https://github.com/<owner>/devspaces-ai-code-template
+   https://<devspaces-url>/#https://github.com/<owner>/devspaces-ai-code-template
    ```
 
 3. **Use Cline** -- open the Cline panel in the VS Code sidebar.
@@ -62,5 +65,6 @@ When you open this repo in DevSpaces, your workspace includes:
 
 ## Customisation
 
-- **LLM endpoint**: edit `LLM_API_BASE_URL` and `LLM_MODEL_ID` in `devfile.yaml`, `.vscode/settings.json`, and `opencode.json`.
+- **LLM endpoint**: the recommended way is via the user secret above. To change the defaults baked into the workspace, edit `LLM_API_BASE_URL` and `LLM_MODEL_ID` in `devfile.yaml`, `.vscode/settings.json`, and `opencode.json`.
+- **LLM model**: change `LLM_MODEL_ID` in the devfile and update `.vscode/settings.json` and `opencode.json` to match.
 - **App code**: replace `app.py` with your own Python application.
