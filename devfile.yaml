@@ -56,6 +56,8 @@ components:
       # Keep the sidecar alive so users can exec into it from the terminal panel
       command: ["tail", "-f", "/dev/null"]
       env:
+        - name: HOME
+          value: "/tmp/opencode-home"
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
         - name: LLM_MODEL_ID
