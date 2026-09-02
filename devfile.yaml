@@ -15,8 +15,10 @@ metadata:
 # ─────────────────────────────────────────────────────────────────────────────
 # EXTENSIONS
 #
-# Declared in .vscode/extensions.json with autoApplyRecommendations=true.
-# Extensions are installed automatically from Open VSX when the IDE starts.
+# Listed via che-code.eclipse.org/vscode-extensions on the dev component.
+# The DevWorkspace operator installs them before VS Code starts, so no
+# registry redirect or autoApplyRecommendations timing issues.
+# Also declared in .vscode/extensions.json for local clone convenience.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -37,17 +39,16 @@ components:
       cpuLimit: "2"
       cpuRequest: 500m
       mountSources: true
-      env:
-        # Point che-code to the full public Open VSX registry so all extensions
-        # in .vscode/extensions.json (including sst-dev.opencode) can be installed.
-        # The DevSpaces built-in proxy only includes a curated subset.
-        - name: OPENVSX_REGISTRY_URL
-          value: "https://open-vsx.org"
       endpoints:
         - name: flask
           targetPort: 8080
           exposure: public
           protocol: https
+    attributes:
+      che-code.eclipse.org/vscode-extensions:
+        - saoudrizwan.claude-dev
+        - cnshenj.vscode-task-manager
+        - sst-dev.opencode
 
   - name: opencode
     container:
