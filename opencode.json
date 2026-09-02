@@ -4,7 +4,7 @@
   "provider": {
     "openai": {
       "options": {
-        "baseURL": "https://api.openai.com/v1"
+        "baseURL": "{env:LLM_API_BASE_URL}"
       }
     }
   }

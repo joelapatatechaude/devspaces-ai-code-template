@@ -21,6 +21,15 @@ metadata:
 # use a postStart event to fetch them before the IDE picks them up.
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────────────────────────────────
+# LLM CONFIGURATION
+#
+# LLM_API_BASE_URL and LLM_API_KEY are injected via a DevSpaces user secret.
+# Create the secret in your <username>-devspaces namespace — see README.md.
+# The postStart script writes .vscode/settings.json from these env vars so
+# both Cline and OpenCode pick up the correct endpoint automatically.
+# ─────────────────────────────────────────────────────────────────────────────
+
 components:
   - name: dev
     container:
@@ -36,11 +45,6 @@ components:
           exposure: public
           protocol: https
       env:
-        # LLM endpoint – set here and in opencode.json / .vscode/settings.json.
-        # Cannot be overridden via a DevSpaces user secret (devfile env takes
-        # precedence over envFrom). Fork this repo to change the endpoint/model.
-        - name: LLM_API_BASE_URL
-          value: "https://api.openai.com/v1"
         # Tells che-code to install the vsix after it is downloaded by postStart
         - name: DEFAULT_EXTENSIONS
           value: "/tmp/cline.vsix"
@@ -53,26 +57,33 @@ components:
       cpuLimit: "1"
       cpuRequest: 250m
       mountSources: true
-      # Keep the sidecar alive so users can exec into it from the terminal panel
       command: ["tail", "-f", "/dev/null"]
       env:
         - name: HOME
           value: "/tmp/opencode-home"
-        - name: LLM_API_BASE_URL
-          value: "https://api.openai.com/v1"
 
 commands:
-  # Downloads Cline vsix from Open VSX before the IDE starts picking it up.
-  # Pinned to a known-good version; bump the URL to update.
-  - id: download-cline
+  - id: setup-workspace
     exec:
-      label: "Download Cline extension"
+      label: "Setup: download Cline and configure LLM endpoint"
       component: dev
       commandLine: >-
+        set -e &&
+        echo "Downloading Cline vsix..." &&
         curl -fsSL
         'https://open-vsx.org/api/saoudrizwan/claude-dev/4.1.16/file/saoudrizwan.claude-dev-4.1.16.vsix'
-        -o /tmp/cline.vsix
-        && echo "Cline vsix downloaded to /tmp/cline.vsix"
+        -o /tmp/cline.vsix &&
+        echo "Writing .vscode/settings.json from env vars..." &&
+        mkdir -p ${PROJECT_SOURCE}/.vscode &&
+        cat > ${PROJECT_SOURCE}/.vscode/settings.json << EOF
+
+        {
+          "cline.apiProvider": "openai-compatible",
+          "cline.openAiBaseUrl": "${LLM_API_BASE_URL:-https://api.openai.com/v1}",
+          "cline.openAiModelId": "gpt-oss-120b"
+        }
+        EOF
+        echo "Done."
 
   - id: run-app
     exec:
@@ -93,4 +104,4 @@ commands:
 
 events:
   postStart:
-    - download-cline
+    - setup-workspace
