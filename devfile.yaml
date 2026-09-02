@@ -37,6 +37,12 @@ components:
       cpuLimit: "2"
       cpuRequest: 500m
       mountSources: true
+      env:
+        # Point che-code to the full public Open VSX registry so all extensions
+        # in .vscode/extensions.json (including sst-dev.opencode) can be installed.
+        # The DevSpaces built-in proxy only includes a curated subset.
+        - name: OPENVSX_REGISTRY_URL
+          value: "https://open-vsx.org"
       endpoints:
         - name: flask
           targetPort: 8080
