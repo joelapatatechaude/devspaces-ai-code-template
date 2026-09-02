@@ -3,8 +3,8 @@ metadata:
   name: ai-code-template
   displayName: AI-Powered Python Workspace
   description: >
-    Python development environment with Cline (VS Code AI agent) and
-    OpenCode (terminal AI agent) pre-configured for your LLM endpoint.
+    Python development environment with Cline, OpenCode, and Task Manager
+    pre-configured for your LLM endpoint.
   tags:
     - Python
     - AI
@@ -13,12 +13,10 @@ metadata:
   language: Python
 
 # ─────────────────────────────────────────────────────────────────────────────
-# EXTENSION INSTALLATION NOTE (DevSpaces 3.29 / VS Code-based editor)
+# EXTENSIONS
 #
-# The old Che-Theia attribute "che-code.eclipse.org/vscode-extensions" is NOT
-# supported by the VS Code (che-code) editor.  The correct approach per RH docs
-# (section 14.3) is to set DEFAULT_EXTENSIONS to a path of .vsix binaries and
-# use a postStart event to fetch them before the IDE picks them up.
+# Declared in .vscode/extensions.json with autoApplyRecommendations=true.
+# Extensions are installed automatically from Open VSX when the IDE starts.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -26,8 +24,8 @@ metadata:
 #
 # LLM_API_BASE_URL and LLM_API_KEY are injected via a DevSpaces user secret.
 # Create the secret in your <username>-devspaces namespace — see README.md.
-# The postStart script writes .vscode/settings.json from these env vars so
-# both Cline and OpenCode pick up the correct endpoint automatically.
+# The postStart script rewrites .vscode/settings.json from env vars so
+# Cline picks up the correct endpoint on every workspace start.
 # ─────────────────────────────────────────────────────────────────────────────
 
 components:
@@ -44,10 +42,6 @@ components:
           targetPort: 8080
           exposure: public
           protocol: https
-      env:
-        # Tells che-code to install the vsix after it is downloaded by postStart
-        - name: DEFAULT_EXTENSIONS
-          value: "/tmp/cline.vsix"
 
   - name: opencode
     container:
@@ -65,16 +59,13 @@ components:
 commands:
   - id: setup-workspace
     exec:
-      label: "Setup: download Cline and configure LLM endpoint"
+      label: "Setup: configure LLM endpoint from env vars"
       component: dev
       commandLine: |
         set -e
-        echo "Downloading Cline vsix..."
-        curl -fsSL 'https://open-vsx.org/api/saoudrizwan/claude-dev/4.1.16/file/saoudrizwan.claude-dev-4.1.16.vsix' -o /tmp/cline.vsix
         echo "Writing .vscode/settings.json from env vars..."
         mkdir -p ${PROJECT_SOURCE}/.vscode
-        BASE_URL="${LLM_API_BASE_URL:-https://api.openai.com/v1}"
-        python3 -c "import json,os; s={'cline.apiProvider':'openai-compatible','cline.openAiBaseUrl':os.environ.get('LLM_API_BASE_URL','https://api.openai.com/v1'),'cline.openAiModelId':'gpt-oss-120b'}; open('${PROJECT_SOURCE}/.vscode/settings.json','w').write(json.dumps(s,indent=2))"
+        python3 -c "import json,os; s={'extensions.autoApplyRecommendations':True,'cline.apiProvider':'openai-compatible','cline.openAiBaseUrl':os.environ.get('LLM_API_BASE_URL','https://api.openai.com/v1'),'cline.openAiModelId':'gpt-oss-120b'}; open('${PROJECT_SOURCE}/.vscode/settings.json','w').write(json.dumps(s,indent=2))"
         echo "Done."
 
   - id: run-app
