@@ -1,12 +1,11 @@
-
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "litemaas/gpt-oss-120b",
-  "providers": {
+  "provider": {
     "litemaas": {
-      "name": "LiteMaaS Provider",
-      "package": "@opencode-ai/ai/providers/openai-compatible",
-      "settings": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LiteMaaS",
+      "options": {
         "baseURL": "{env:LLM_API_BASE_URL}",
         "apiKey": "{env:LLM_API_KEY}"
       },
