@@ -67,23 +67,14 @@ commands:
     exec:
       label: "Setup: download Cline and configure LLM endpoint"
       component: dev
-      commandLine: >-
-        set -e &&
-        echo "Downloading Cline vsix..." &&
-        curl -fsSL
-        'https://open-vsx.org/api/saoudrizwan/claude-dev/4.1.16/file/saoudrizwan.claude-dev-4.1.16.vsix'
-        -o /tmp/cline.vsix &&
-        echo "Writing .vscode/settings.json from env vars..." &&
-        mkdir -p ${PROJECT_SOURCE}/.vscode &&
-        python3 -c "
-        import json, os
-        s = {
-          'cline.apiProvider': 'openai-compatible',
-          'cline.openAiBaseUrl': os.environ.get('LLM_API_BASE_URL', 'https://api.openai.com/v1'),
-          'cline.openAiModelId': 'gpt-oss-120b'
-        }
-        open('${PROJECT_SOURCE}/.vscode/settings.json', 'w').write(json.dumps(s, indent=2))
-        " &&
+      commandLine: |
+        set -e
+        echo "Downloading Cline vsix..."
+        curl -fsSL 'https://open-vsx.org/api/saoudrizwan/claude-dev/4.1.16/file/saoudrizwan.claude-dev-4.1.16.vsix' -o /tmp/cline.vsix
+        echo "Writing .vscode/settings.json from env vars..."
+        mkdir -p ${PROJECT_SOURCE}/.vscode
+        BASE_URL="${LLM_API_BASE_URL:-https://api.openai.com/v1}"
+        python3 -c "import json,os; s={'cline.apiProvider':'openai-compatible','cline.openAiBaseUrl':os.environ.get('LLM_API_BASE_URL','https://api.openai.com/v1'),'cline.openAiModelId':'gpt-oss-120b'}; open('${PROJECT_SOURCE}/.vscode/settings.json','w').write(json.dumps(s,indent=2))"
         echo "Done."
 
   - id: run-app
