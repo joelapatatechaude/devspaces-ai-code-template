@@ -1,11 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-oss-120b",
+  "model": "maas/gpt-oss-120b",
   "provider": {
-    "openai": {
+    "maas": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "MAAS",
       "options": {
         "baseURL": "{env:LLM_API_BASE_URL}",
         "apiKey": "{env:LLM_API_KEY}"
+      },
+      "models": {
+        "gpt-oss-120b": {
+          "name": "GPT-OSS-120B"
+        }
       }
     }
   }
