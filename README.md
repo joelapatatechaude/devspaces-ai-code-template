@@ -22,36 +22,41 @@ When you open this repo in DevSpaces, your workspace includes:
    apiVersion: v1
    kind: Secret
    metadata:
-     name: litemass-llm
+     name: llm-credentials
      namespace: <username>-devspaces
      labels:
-       controller.devfile.io/devworkspace-mount-secret: "true"
+       controller.devfile.io/mount-to-devworkspace: "true"
+       controller.devfile.io/watch-secret: "true"
      annotations:
        controller.devfile.io/mount-as: env
    type: Opaque
    stringData:
      LLM_API_KEY: "<your-api-key>"
-     LLM_API_BASE_URL: "<your-llm-endpoint, e.g. https://api.litemass.com/v1>"
    ```
 
    Or via CLI:
 
    ```bash
-   oc create secret generic litemass-llm \
+   oc create secret generic llm-credentials \
      --from-literal=LLM_API_KEY='<your-api-key>' \
-     --from-literal=LLM_API_BASE_URL='<your-llm-endpoint>' \
      -n <username>-devspaces
 
-   oc label secret litemass-llm \
-     controller.devfile.io/devworkspace-mount-secret=true \
+   oc label secret llm-credentials \
+     controller.devfile.io/mount-to-devworkspace=true \
+     controller.devfile.io/watch-secret=true \
      -n <username>-devspaces
 
-   oc annotate secret litemass-llm \
+   oc annotate secret llm-credentials \
      controller.devfile.io/mount-as=env \
      -n <username>-devspaces
    ```
 
-   The secret values override the defaults in the devfile. Restart your workspace after creating or updating the secret.
+   > **Note:** The secret injects `LLM_API_KEY` into all workspace containers.
+   > The LLM endpoint (`LLM_API_BASE_URL`) and model are set directly in the
+   > devfile and cannot be overridden via a secret — edit `devfile.yaml`,
+   > `.vscode/settings.json`, and `opencode.json` in your fork to change them.
+
+   Restart your workspace after creating or updating the secret.
 
 2. **Launch the workspace** from your DevSpaces dashboard:
 
@@ -65,6 +70,5 @@ When you open this repo in DevSpaces, your workspace includes:
 
 ## Customisation
 
-- **LLM endpoint**: the recommended way is via the user secret above. To change the defaults baked into the workspace, edit `LLM_API_BASE_URL` and `LLM_MODEL_ID` in `devfile.yaml`, `.vscode/settings.json`, and `opencode.json`.
-- **LLM model**: change `LLM_MODEL_ID` in the devfile and update `.vscode/settings.json` and `opencode.json` to match.
+- **LLM endpoint and model**: edit `LLM_API_BASE_URL` in `devfile.yaml`, `opencode.json`, and `.vscode/settings.json`. These are set at workspace build time and cannot be overridden via a secret.
 - **App code**: replace `app.py` with your own Python application.

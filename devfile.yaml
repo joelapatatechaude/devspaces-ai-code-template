@@ -36,11 +36,11 @@ components:
           exposure: public
           protocol: https
       env:
-        # LLM endpoint – override in your fork or via a DevSpaces user secret
+        # LLM endpoint – set here and in opencode.json / .vscode/settings.json.
+        # Cannot be overridden via a DevSpaces user secret (devfile env takes
+        # precedence over envFrom). Fork this repo to change the endpoint/model.
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
-        - name: LLM_MODEL_ID
-          value: "gpt-oss-120b"
         # Tells che-code to install the vsix after it is downloaded by postStart
         - name: DEFAULT_EXTENSIONS
           value: "/tmp/cline.vsix"
@@ -60,8 +60,6 @@ components:
           value: "/tmp/opencode-home"
         - name: LLM_API_BASE_URL
           value: "https://api.openai.com/v1"
-        - name: LLM_MODEL_ID
-          value: "gpt-oss-120b"
 
 commands:
   # Downloads Cline vsix from Open VSX before the IDE starts picking it up.
