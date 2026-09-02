@@ -1,5 +1,7 @@
 # DevSpaces AI Code Template
 
+[![Open in DevSpaces](https://img.shields.io/badge/Open%20in-DevSpaces-blue?logo=eclipseche)](https://devspaces.apps.ai.hcp.cszevaco.com/dashboard/#/load-factory?url=https://github.com/joelapatatechaude/devspaces-ai-code-template&policies.create=perclick)
+
 A Python project template for OpenShift DevSpaces with **Cline** (VS Code AI agent) and **OpenCode** (terminal AI agent) pre-configured.
 
 ## What you get
