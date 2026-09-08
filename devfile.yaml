@@ -53,23 +53,40 @@ components:
   - name: opencode
     container:
       image: ghcr.io/anomalyco/opencode:latest
-      memoryLimit: 1Gi
-      memoryRequest: 256Mi
-      cpuLimit: "1"
-      cpuRequest: 250m
+      memoryLimit: 256Mi
+      memoryRequest: 64Mi
+      cpuLimit: 200m
+      cpuRequest: 50m
       mountSources: true
       command: ["tail", "-f", "/dev/null"]
-      env:
-        - name: HOME
-          value: "/tmp/opencode-home"
 
 commands:
+  - id: copy-opencode
+    exec:
+      label: "Copy opencode binary to shared volume"
+      component: opencode
+      commandLine: |
+        set -e
+        mkdir -p /projects/.opencode/bin
+        if [ ! -x /projects/.opencode/bin/opencode ] || \
+           [ "$(opencode --version 2>/dev/null)" != "$(/projects/.opencode/bin/opencode --version 2>/dev/null)" ]; then
+          echo "Copying opencode binary to shared volume..."
+          cp /usr/local/bin/opencode /projects/.opencode/bin/opencode
+          chmod +x /projects/.opencode/bin/opencode
+          echo "Done — opencode $(/projects/.opencode/bin/opencode --version) available."
+        else
+          echo "opencode already up to date."
+        fi
+
   - id: setup-workspace
     exec:
       label: "Setup: configure LLM endpoint from env vars"
       component: dev
       commandLine: |
         set -e
+        export PATH="/projects/.opencode/bin:$PATH"
+        grep -q '/projects/.opencode/bin' "$HOME/.bashrc" 2>/dev/null || \
+          echo 'export PATH="/projects/.opencode/bin:$PATH"' >> "$HOME/.bashrc"
         echo "Writing .vscode/settings.json from env vars..."
         mkdir -p ${PROJECT_SOURCE}/.vscode
         python3 -c "import json,os; s={'extensions.autoApplyRecommendations':True,'cline.apiProvider':'openai-compatible','cline.openAiBaseUrl':os.environ.get('LLM_API_BASE_URL','https://api.openai.com/v1'),'cline.openAiModelId':'gpt-oss-120b'}; open('${PROJECT_SOURCE}/.vscode/settings.json','w').write(json.dumps(s,indent=2))"
@@ -88,10 +105,11 @@ commands:
   - id: opencode-run
     exec:
       label: "Launch OpenCode (terminal AI)"
-      component: opencode
-      commandLine: "cd ${PROJECT_SOURCE} && opencode"
+      component: dev
+      commandLine: "export PATH=/projects/.opencode/bin:$PATH && opencode"
       workingDir: ${PROJECT_SOURCE}
 
 events:
   postStart:
+    - copy-opencode
     - setup-workspace
