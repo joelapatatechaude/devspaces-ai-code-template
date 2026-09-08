@@ -24,10 +24,12 @@ metadata:
 # ─────────────────────────────────────────────────────────────────────────────
 # LLM CONFIGURATION
 #
-# LLM_API_BASE_URL and LLM_API_KEY are injected via a DevSpaces user secret.
-# Create the secret in your <username>-devspaces namespace — see README.md.
-# The postStart script rewrites .vscode/settings.json from env vars so
-# Cline picks up the correct endpoint on every workspace start.
+# Credentials are injected via a DevSpaces user secret in your
+# <username>-devspaces namespace — see README.md.
+#
+# The secret should provide:
+#   LLM_API_BASE_URL / LLM_API_KEY       → used by OpenCode (opencode.json)
+#   OPENAI_BASE_URL  / OPENAI_API_KEY    → used by Cline (OpenAI SDK)
 # ─────────────────────────────────────────────────────────────────────────────
 
 components:
@@ -75,16 +77,13 @@ commands:
 
   - id: setup-workspace
     exec:
-      label: "Setup: configure LLM endpoint from env vars"
+      label: "Setup: add opencode to PATH"
       component: dev
       commandLine: |
         set -e
         export PATH="/projects/.opencode/bin:$PATH"
         grep -q '/projects/.opencode/bin' "$HOME/.bashrc" 2>/dev/null || \
           echo 'export PATH="/projects/.opencode/bin:$PATH"' >> "$HOME/.bashrc"
-        echo "Writing .vscode/settings.json from env vars..."
-        mkdir -p ${PROJECT_SOURCE}/.vscode
-        python3 -c "import json,os; s={'extensions.autoApplyRecommendations':True,'cline.apiProvider':'openai-compatible','cline.openAiBaseUrl':os.environ.get('LLM_API_BASE_URL','https://api.openai.com/v1'),'cline.openAiModelId':'gpt-oss-120b'}; open('${PROJECT_SOURCE}/.vscode/settings.json','w').write(json.dumps(s,indent=2))"
         echo "Done."
 
   - id: run-app
