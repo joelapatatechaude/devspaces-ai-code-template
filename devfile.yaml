@@ -39,6 +39,11 @@ components:
       cpuLimit: "2"
       cpuRequest: 500m
       mountSources: true
+      env:
+        - name: LLM_API_BASE_URL
+          value: "https://api.openai.com/v1"
+        - name: LLM_MODEL_ID
+          value: "gpt-oss-120b"
       endpoints:
         - name: flask
           targetPort: 8080
