@@ -61,7 +61,10 @@ commands:
           echo "opencode already installed: $(/projects/.opencode/bin/opencode --version)"
         else
           echo "Installing opencode (glibc build)..."
-          OPENCODE_INSTALL_DIR=/projects/.opencode/bin curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
+          curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
+          mkdir -p /projects/.opencode/bin
+          cp "$HOME/.opencode/bin/opencode" /projects/.opencode/bin/opencode
+          chmod +x /projects/.opencode/bin/opencode
           echo "Done — opencode $(/projects/.opencode/bin/opencode --version) installed."
         fi
 
