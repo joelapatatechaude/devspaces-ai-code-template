@@ -50,32 +50,19 @@ components:
         - cnshenj.vscode-task-manager
         - sst-dev.opencode
 
-  - name: opencode
-    container:
-      image: ghcr.io/anomalyco/opencode:latest
-      memoryLimit: 256Mi
-      memoryRequest: 64Mi
-      cpuLimit: 200m
-      cpuRequest: 50m
-      mountSources: true
-      command: ["tail", "-f", "/dev/null"]
-
 commands:
-  - id: copy-opencode
+  - id: install-opencode
     exec:
-      label: "Copy opencode binary to shared volume"
-      component: opencode
+      label: "Install opencode CLI (glibc build)"
+      component: dev
       commandLine: |
         set -e
-        mkdir -p /projects/.opencode/bin
-        if [ ! -x /projects/.opencode/bin/opencode ] || \
-           [ "$(opencode --version 2>/dev/null)" != "$(/projects/.opencode/bin/opencode --version 2>/dev/null)" ]; then
-          echo "Copying opencode binary to shared volume..."
-          cp /usr/local/bin/opencode /projects/.opencode/bin/opencode
-          chmod +x /projects/.opencode/bin/opencode
-          echo "Done — opencode $(/projects/.opencode/bin/opencode --version) available."
+        if [ -x /projects/.opencode/bin/opencode ] && /projects/.opencode/bin/opencode --version >/dev/null 2>&1; then
+          echo "opencode already installed: $(/projects/.opencode/bin/opencode --version)"
         else
-          echo "opencode already up to date."
+          echo "Installing opencode (glibc build)..."
+          OPENCODE_INSTALL_DIR=/projects/.opencode/bin curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
+          echo "Done — opencode $(/projects/.opencode/bin/opencode --version) installed."
         fi
 
   - id: setup-workspace
@@ -111,5 +98,5 @@ commands:
 
 events:
   postStart:
-    - copy-opencode
+    - install-opencode
     - setup-workspace
