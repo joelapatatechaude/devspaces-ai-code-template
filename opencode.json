@@ -9,11 +9,17 @@
         "baseURL": "{env:LLM_API_BASE_URL}",
         "apiKey": "{env:LLM_API_KEY}"
       },
-      "models": {
-        "gpt-oss-120b": {
-          "name": "GPT-OSS-120B"
-        }
-      }
+"models": {
+            "gpt-oss-120b": {
+              "name": "GPT-OSS-120B"
+            },
+            "gpt-oss-20b": {
+              "name": "GPT-OSS-20B"
+            },
+            "deepseek-r1-distill-qwen-14b": {
+              "name": "deepseek-r1-distill-qwen-14b"
+            }
+          }
     }
   }
 }
